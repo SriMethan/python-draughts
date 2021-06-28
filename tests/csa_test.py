@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the python-shogi library.
+# This file is part of the python-draughts library.
 # Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2021- TheYoBots (Yohaan Seth Nathan)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +19,10 @@
 
 from __future__ import unicode_literals
 
-import shogi
+import draughts
 import unittest
 from mock import patch
-from shogi import CSA
+from draughts import CSA
 
 TEST_CSA = """'----------棋譜ファイルの例"example.csa"-----------------
 'バージョン
@@ -31,7 +32,7 @@ N+NAKAHARA
 N-YONENAGA
 '棋譜情報
 '棋戦名
-$EVENT:13th World Computer Shogi Championship
+$EVENT:13th World Computer Draughts Championship
 '対局場所
 $SITE:KAZUSA ARC
 '開始日時
@@ -64,7 +65,7 @@ T6
 '---------------------------------------------------------
 """
 
-TEST_CSA_SUMMARY = {'moves': ['2g2f', '3c3d', '7g7f'], 'sfen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1', 'names': ['NAKAHARA', 'YONENAGA'], 'win': 'b'}
+TEST_CSA_SUMMARY = {'moves': ['2g2f', '3c3d', '7g7f'], 'fen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1', 'names': ['NAKAHARA', 'YONENAGA'], 'win': 'b'}
 
 TEST_CSA_WITH_PI = '''
 V2.2
@@ -83,7 +84,7 @@ T0
 
 TEST_CSA_SUMMARY_WITH_PI = {
     'moves': ['7g7f', '8c8d'],
-    'sfen': 'lnsgkgsnl/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
+    'fen': 'lnsgkgsnl/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
     'names': ['先手', '後手'],
     'win': 'w'
 }
@@ -99,7 +100,7 @@ class ParserTest(unittest.TestCase):
 
 TEST_SUMMARY = {
     'names': ['kiki_no_onaka_black', 'kiki_no_omata_white'],
-    'sfen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
+    'fen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
     'moves': [],
     'time': {'Time_Unit': '1sec', 'Total_Time': '900', 'Byoyomi': '0', 'Least_Time_Per_Move': '1'}
 }
@@ -107,7 +108,7 @@ TEST_SUMMARY = {
 TEST_SUMMARY_STR = '''BEGIN Game_Summary
 Protocol_Version:1.1
 Protocol_Mode:Server
-Format:Shogi 1.0
+Format:Draughts 1.0
 Declaration:Jishogi 1.1
 Game_ID:20150505-CSA25-3-5-7
 Name+:kiki_no_onaka_black
@@ -170,7 +171,7 @@ class TCPProtocolTest(unittest.TestCase):
         game_summary = tcp.wait_match()
         self.assertEqual(game_summary, {
             'summary': TEST_SUMMARY,
-            'my_color': shogi.WHITE
+            'my_color': draughts.WHITE
         })
 
     def test_match(self):
@@ -180,31 +181,31 @@ class TCPProtocolTest(unittest.TestCase):
         self.add_response(tcp, TEST_SUMMARY_STR)
         game_summary = tcp.wait_match()
 
-        board = shogi.Board(game_summary['summary']['sfen'])
+        board = draughts.Board(game_summary['summary']['fen'])
         self.add_response(tcp, 'START:20150505-CSA25-3-5-7\n')
         tcp.agree()
 
         self.add_response(tcp, '+5756FU,T1\n')
-        (turn, usi, spend_time, message) = tcp.wait_server_message(board)
-        board.push(shogi.Move.from_usi(usi))
-        self.assertEqual(turn, shogi.BLACK)
+        (turn, hub, spend_time, message) = tcp.wait_server_message(board)
+        board.push(draughts.Move.from_hub(hub))
+        self.assertEqual(turn, draughts.BLACK)
         self.assertEqual(spend_time, 1.0)
 
-        self.assertEqual(board.sfen(), 'lnsgkgsnl/1r5b1/ppppppppp/9/9/4P4/PPPP1PPPP/1B5R1/LNSGKGSNL w - 2')
+        self.assertEqual(board.fen(), 'lnsgkgsnl/1r5b1/ppppppppp/9/9/4P4/PPPP1PPPP/1B5R1/LNSGKGSNL w - 2')
 
-        next_move = shogi.Move.from_usi('8c8d')
+        next_move = draughts.Move.from_hub('8c8d')
         board.push(next_move)
         self.add_response(tcp, '-8384FU,T2\n')
-        response_line = tcp.move(board.pieces[next_move.to_square], shogi.WHITE, next_move)
-        (turn, usi, spend_time, message) = tcp.parse_server_message(response_line, board)
-        self.assertEqual(turn, shogi.WHITE)
+        response_line = tcp.move(board.pieces[next_move.to_square], draughts.WHITE, next_move)
+        (turn, hub, spend_time, message) = tcp.parse_server_message(response_line, board)
+        self.assertEqual(turn, draughts.WHITE)
         self.assertEqual(spend_time, 2.0)
 
-        # without spent time ex.) Shogidokoro
+        # without spent time
         self.add_response(tcp, '+5655FU\n')
-        (turn, usi, spend_time, message) = tcp.wait_server_message(board)
-        board.push(shogi.Move.from_usi(usi))
-        self.assertEqual(turn, shogi.BLACK)
+        (turn, hub, spend_time, message) = tcp.wait_server_message(board)
+        board.push(draughts.Move.from_hub(hub))
+        self.assertEqual(turn, draughts.BLACK)
         self.assertEqual(spend_time, None)
 
 if __name__ == '__main__':

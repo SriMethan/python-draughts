@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the python-shogi library.
+# This file is part of the python-draughts library.
 # Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2021- TheYoBots (Yohaan Seth Nathan)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 from __future__ import unicode_literals
 
 import re
-import shogi
+import draughts
 
 NAME_SUFFIX_RE = re.compile(r'(小\d|奨励会|アマ|さん|[四五六七八九]段|[一二三四五六]冠|前?(名人|棋聖|王位|王座|王将|棋王|九段|十段|竜王|nhk杯|新人王|女王|女流王座|女流名人|女流王将|女流王位|倉敷藤花)+)$')
 
@@ -64,7 +65,7 @@ NAMES_OF_PROFESSIONAL_PLAYERS = [
     '松浦卓造',
     '山田道美',
     '市川伸',
-    # shogi renmei
+    # draughts renmei
     '金易二郎',
     '木村義雄',
     '金子金五郎',

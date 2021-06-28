@@ -1,57 +1,23 @@
-python-shogi: a pure Python shogi library
+python-draughts: A draughts library written purely in python.
 =========================================
-
-.. image:: https://travis-ci.org/gunyarakun/python-shogi.svg
-    :target: https://travis-ci.org/gunyarakun/python-shogi
-
-.. image:: https://coveralls.io/repos/gunyarakun/python-shogi/badge.svg
-    :target: https://coveralls.io/r/gunyarakun/python-shogi
-
-.. image:: https://badge.fury.io/py/python-shogi.svg
-    :target: https://pypi.python.org/pypi/python-shogi
 
 Introduction
 ------------
 
-This is the module for shogi written in Pure Python. It's based on python-chess commit 6203406259504cddf6f271e6a7b1e04ba0c96165.
-
-This is the scholars mate in python-shogi:
-
-.. code:: python
-
-    >>> import shogi
-
-    >>> board = shogi.Board()
-
-    >>> board.push(shogi.Move.from_usi('7g7f'))
-
-    >>> board.push_usi('3c3d')
-    Move.from_usi('3c3d')
-    >>> board.push_usi('8h2b+')
-    Move.from_usi('8h2b+')
-    >>> board.push_usi('4a5b')
-    Move.from_usi('4a5b')
-    >>> board.push_usi('B*4b')
-    Move.from_usi('B*4b')
-    >>> board.push_usi('5a4a')
-    Move.from_usi('5a4a')
-    >>> board.push_usi('2b3a')
-    Move.from_usi('2b3a')
-    >>> board.is_checkmate()
-    True
+This is the module for draughts written in Pure Python. It's based on python-shogi, which is based on python-chess commit 6203406259504cddf6f271e6a7b1e04ba0c96165.
 
 Features
 --------
 
 * Supports Python 2.7 and Python 3.3+.
 
-* Supports standard shogi (hon shogi)
+* Supports standard draughts (10x10)
 
 * Legal move generator and move validation.
 
   .. code:: python
 
-      >>> shogi.Move.from_usi("5i5a") in board.legal_moves
+      >>> draughts.Move.from_hub("5i5a") in board.legal_moves
       False
 
 * Make and unmake moves.
@@ -60,7 +26,7 @@ Features
 
       >>> last_move = board.pop() # Unmake last move
       >>> last_move
-      Move.from_usi('2b3a')
+      Move.from_hub('2b3a')
 
       >>> board.push(last_move) # Restore
 
@@ -81,11 +47,11 @@ Features
       <BLANKLINE>
        S*1
 
-* Show a KIF style board.
+* Show a PDN style board.
 
   .. code:: python
 
-      >>> print(board.kif_str())
+      >>> print(board.pdn_str())
       後手の持駒：
         ９ ８ ７ ６ ５ ４ ３ ２ １
       +---------------------------+
@@ -125,12 +91,12 @@ Features
 
       >>> board.is_check()
       True
-      >>> board.is_attacked_by(shogi.BLACK, shogi.A4)
+      >>> board.is_attacked_by(draughts.BLACK, draughts.A4)
       True
-      >>> attackers = board.attackers(shogi.BLACK, shogi.H5)
+      >>> attackers = board.attackers(draughts.BLACK, draughts.H5)
       >>> attackers
       SquareSet(0b111000010000000000000000000000000000000000000000000000000000000000000000000000)
-      >>> shogi.H2 in attackers
+      >>> draughts.H2 in attackers
       True
       >>> print(attackers)
       . . . . . . . . .
@@ -143,58 +109,58 @@ Features
       . . . . . . . 1 .
       . . . 1 1 1 . . .
 
-* Parses and creates USI representation of moves.
+* Parses and creates HUB representation of moves.
 
   .. code:: python
 
-      >>> board = shogi.Board()
-      >>> shogi.Move(shogi.E2, shogi.E4).usi()
+      >>> board = draughts.Board()
+      >>> draughts.Move(draughts.E2, draughts.E4).hub()
       '2e4e'
 
-* Parses and creates SFENs
+* Parses and creates FENs
 
   .. code:: python
 
-      >>> board.sfen()
+      >>> board.fen()
       'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1'
-      >>> board.piece_at(shogi.I5)
+      >>> board.piece_at(draughts.I5)
       Piece.from_symbol('K')
 
-* Read KIFs.
+* Read PDNs.
 
   .. code:: python
 
-      >>> import shogi.KIF
+      >>> import draughts.PDN
 
-      >>> kif = shogi.KIF.Parser.parse_file('data/games/habu-fujii-2006.kif')[0]
+      >>> pdn = draughts.PDN.Parser.parse_file('data/games/habu-fujii-2006.pdn')[0]
 
-      >>> kif['names'][shogi.BLACK]
+      >>> pdn['names'][draughts.BLACK]
       '羽生善治'
-      >>> kif['names'][shogi.WHITE]
+      >>> pdn['names'][draughts.WHITE]
       '藤井猛'
-      >>> kif['moves'] # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+      >>> pdn['moves'] # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
       ['7g7f',
        '3c3d',
        ...,
        '9a9b',
        '7a7b+']
-      >>> kif['win']
+      >>> pdn['win']
       'b'
 
 * Communicate with a CSA protocol.
 
-  Please see `random_csa_tcp_match <https://github.com/gunyarakun/python-shogi/blob/master/scripts/random_csa_tcp_match>`_.
+  Please see `random_csa_tcp_match <https://github.com/TheYoBots/python-draughts/blob/master/scripts/random_csa_tcp_match>`_.
 
-* Parse professional shogi players' name
+* Parse professional draughts players' name
 
-      >>> import shogi.Person
+      >>> import draughts.Person
 
-      >>> shogi.Person.Name.is_professional('羽生　善治 名人・棋聖・王位・王座')
+      >>> draughts.Person.Name.is_professional('羽生　善治 名人・棋聖・王位・王座')
       True
 
 Performance
 -----------
-python-shogi is not intended to be used by serious shogi engines where
+python-draughts is not intended to be used by serious draughts engines where
 performance is critical. The goal is rather to create a simple and relatively
 highlevel library.
 
@@ -202,7 +168,7 @@ You can install the `gmpy2` or `gmpy` (https://code.google.com/p/gmpy/) modules
 in order to get a slight performance boost on basic operations like bit scans
 and population counts.
 
-python-shogi will only ever import very basic general (non-shogi-related)
+python-draughts will only ever import very basic general (non-draughts-related)
 operations from native libraries. All logic is pure Python. There will always
 be pure Python fallbacks.
 
@@ -213,7 +179,7 @@ Installing
 
   ::
 
-      sudo pip install python-shogi
+      sudo pip install python-draughts
 
 * From current source code:
 
@@ -253,16 +219,9 @@ How to release
   python setup.py sdist
   twine upload dist/*
 
-ToDo
+Acknowledgements
 ----
 
-- Support USI protocol.
-
-- Support board.generate_attacks() and use it in board.is_attacked_by() and board.attacker_mask().
-
-- Remove rotated bitboards and support `Shatranj-style direct lookup
-  <http://arxiv.org/pdf/0704.3773.pdf>`_ like recent python-chess.
-
-- Support %MATTA etc. in CSA TCP Protocol.
-
-- Support board.is_pinned() and board.pin().
+- python-chess
+- python-shogi
+- draughtsnet

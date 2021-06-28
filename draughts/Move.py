@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 # NOTE: In chess we use "file - rank" notation like 'a1',
-#       in shogi we use a number for file, an alphabet for rank
+#       in draughts we use a number for file, an alphabet for rank
 #       and opposite direction of files and ranks like '9i'.
 #       We use chess style notation internally, but exports it with this table.
 
@@ -45,9 +45,9 @@ class Move(object):
                 raise ValueError('Drop piece type must not be set.')
             self.drop_piece_type = None
 
-    def usi(self):
+    def hub(self):
         '''
-        Gets an USI string for the move.
+        Gets an HUB string for the move.
         For example a move from 7A to 8A would be `7a8a` or `7a8a+` if it is
         a promotion.
         '''
@@ -77,10 +77,10 @@ class Move(object):
         return not self.__eq__(other)
 
     def __repr__(self):
-        return "Move.from_usi('{0}')".format(self.usi())
+        return "Move.from_hub('{0}')".format(self.hub())
 
     def __str__(self):
-        return self.usi()
+        return self.hub()
 
     def __hash__(self):
         # 7 bit is enough to represent 81 patterns
@@ -91,23 +91,23 @@ class Move(object):
             return self.to_square | (81 + self.drop_piece_type) << 7
 
     @classmethod
-    def from_usi(cls, usi):
+    def from_hub(cls, hub):
         '''
-        Parses an USI string.
-        Raises `ValueError` if the USI string is invalid.
+        Parses an HUB string.
+        Raises `ValueError` if the HUB string is invalid.
         '''
-        if usi == '0000':
+        if hub == '0000':
             return cls.null()
-        elif len(usi) == 4:
-            if usi[1] == '*':
-                piece = Piece.from_symbol(usi[0])
-                return cls(None, SQUARE_NAMES.index(usi[2:4]), False, piece.piece_type)
+        elif len(hub) == 4:
+            if hub[1] == '*':
+                piece = Piece.from_symbol(hub[0])
+                return cls(None, SQUARE_NAMES.index(hub[2:4]), False, piece.piece_type)
             else:
-                return cls(SQUARE_NAMES.index(usi[0:2]), SQUARE_NAMES.index(usi[2:4]))
-        elif len(usi) == 5 and usi[4] == '+':
-            return cls(SQUARE_NAMES.index(usi[0:2]), SQUARE_NAMES.index(usi[2:4]), True)
+                return cls(SQUARE_NAMES.index(hub[0:2]), SQUARE_NAMES.index(hub[2:4]))
+        elif len(hub) == 5 and hub[4] == '+':
+            return cls(SQUARE_NAMES.index(hub[0:2]), SQUARE_NAMES.index(hub[2:4]), True)
         else:
-            raise ValueError('expected usi string to be of length 4 or 5')
+            raise ValueError('expected hub string to be of length 4 or 5')
 
     @classmethod
     def null(cls):
@@ -116,7 +116,7 @@ class Move(object):
         A null move just passes the turn to the other side (and possibly
         forfeits en-passant capturing). Null moves evaluate to `False` in
         boolean contexts.
-        >>> bool(shogi.Move.null())
+        >>> bool(draughts.Move.null())
         False
         '''
         return cls(None, None, NONE)

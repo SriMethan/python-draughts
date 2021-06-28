@@ -3,8 +3,8 @@
 
 from __future__ import print_function, unicode_literals
 
-import shogi
-from shogi import CSA
+import draughts
+from draughts import CSA
 import random
 
 import sys
@@ -22,14 +22,14 @@ while True:
 # ct = CSAProtocol('wdoor.c.u-tokyo.ac.jp', 4081)
     ct.login(sys.argv[2], sys.argv[3])
     game_summary = ct.wait_match()
-    sfen = game_summary['summary']['sfen']
+    fen = game_summary['summary']['fen']
     my_color = game_summary['my_color']
-    board = shogi.Board(sfen)
+    board = draughts.Board(fen)
     ct.agree()
 
     while True:
-        print(board.sfen())
-        print(board.kif_str())
+        print(board.fen())
+        print(board.pdn_str())
 
         if board.turn == my_color:
             moves = []
@@ -45,7 +45,7 @@ while True:
                 board.push(next_move)
                 ct.move(board.pieces[next_move.to_square], my_color, next_move)
         else:
-            (turn, usi, spend_time, message) = ct.wait_server_message(board)
+            (turn, hub, spend_time, message) = ct.wait_server_message(board)
 
             if message is not None:
                 print('MESSAGE: {0}'.format(CSA.SERVER_MESSAGE_SYMBOLS[message]))
@@ -60,6 +60,6 @@ while True:
             else:
                 if turn != board.turn:
                     raise ValueError('Invalid turn')
-                move = shogi.Move.from_usi(usi)
+                move = draughts.Move.from_hub(hub)
                 print('ADD OPPONENT MOVE: {0}'.format(move))
                 board.push(move)

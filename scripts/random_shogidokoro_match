@@ -3,8 +3,8 @@
 
 from __future__ import print_function, unicode_literals
 
-import shogi
-from shogi import CSA
+import draughts
+from draughts import CSA
 import random
 import sys
 import time
@@ -16,9 +16,9 @@ if len(sys.argv) != 4:
 ct = CSA.TCPProtocol(sys.argv[1], 4081)
 ct.login(sys.argv[2], sys.argv[3])
 game_summary = ct.wait_match()
-sfen = game_summary['summary']['sfen']
+fen = game_summary['summary']['fen']
 my_color = game_summary['my_color']
-board = shogi.Board(sfen)
+board = draughts.Board(fen)
 ct.agree()
 
 while True:
@@ -33,15 +33,15 @@ while True:
 
     next_move = random.choice(moves)
     board.push(next_move)
-    print(board.kif_str())
+    print(board.pdn_str())
     print('pc turn end. and waiting Player')
     recieved_cmd = ct.move(
             board.pieces[next_move.to_square], my_color, next_move)
 
     print('Player moved')
-    (_, usi, spend_time, message) = ct.parse_server_message(
+    (_, hub, spend_time, message) = ct.parse_server_message(
             recieved_cmd, board)
-    move = shogi.Move.from_usi(usi)
+    move = draughts.Move.from_hub(hub)
     board.push(move)
-    print(board.kif_str())
+    print(board.pdn_str())
     print('Player moving handle end. and now pc turn')

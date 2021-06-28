@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the python-shogi library.
+# This file is part of the python-draughts library.
 # Copyright (C) 2012-2014 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
 # Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2021- TheYoBots (YohaanSethNathan)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -67,7 +68,7 @@ NUMBER_JAPANESE_KANJI_SYMBOLS = [
     '十五', '十六', '十七', '十八'
 ]
 
-STARTING_SFEN = 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1'
+STARTING_FEN = 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1'
 
 SQUARES = [
     A9, A8, A7, A6, A5, A4, A3, A2, A1,
@@ -478,7 +479,7 @@ class Occupied(object):
     def __getitem__(self, key):
         if key in COLORS:
             return self.by_color[key]
-        raise KeyError('Occupied must be looked up with shogi.BLACK or shogi.WHITE')
+        raise KeyError('Occupied must be looked up with draughts.BLACK or draughts.WHITE')
 
     def ixor(self, mask, color, square):
         self.bits ^= mask
@@ -511,17 +512,17 @@ class Board(object):
     game end detection, move counters and the capability to make and unmake
     moves.
     The bitboard is initialized to the starting position, unless otherwise
-    specified in the optional `sfen` argument.
+    specified in the optional `fen` argument.
     '''
 
-    def __init__(self, sfen=None):
+    def __init__(self, fen=None):
         self.pseudo_legal_moves = PseudoLegalMoveGenerator(self)
         self.legal_moves = LegalMoveGenerator(self)
 
-        if sfen is None:
+        if fen is None:
             self.reset()
         else:
-            self.set_sfen(sfen)
+            self.set_fen(fen)
 
     def reset(self):
         '''Restores the starting position.'''
@@ -1066,11 +1067,11 @@ class Board(object):
         '''Gets the last move from the move stack.'''
         return self.move_stack[-1]
 
-    def sfen(self):
+    def fen(self):
         '''
-        Gets an SFEN representation of the current position.
+        Gets an FEN representation of the current position.
         '''
-        sfen = []
+        fen = []
         empty = 0
 
         # Position part.
@@ -1081,27 +1082,27 @@ class Board(object):
                 empty += 1
             else:
                 if empty:
-                    sfen.append(str(empty))
+                    fen.append(str(empty))
                     empty = 0
-                sfen.append(piece.symbol())
+                fen.append(piece.symbol())
 
             if BB_SQUARES[square] & BB_FILE_1:
                 if empty:
-                    sfen.append(str(empty))
+                    fen.append(str(empty))
                     empty = 0
 
                 if square != I1:
-                    sfen.append('/')
+                    fen.append('/')
 
-        sfen.append(' ')
+        fen.append(' ')
 
         # Side to move.
         if self.turn == WHITE:
-            sfen.append('w')
+            fen.append('w')
         else:
-            sfen.append('b')
+            fen.append('b')
 
-        sfen.append(' ')
+        fen.append(' ')
 
         # Pieces in hand
         pih_len = 0
@@ -1111,33 +1112,33 @@ class Board(object):
             for piece_type in sorted(p.keys(), reverse=True):
                 if p[piece_type] >= 1:
                     if p[piece_type] > 1:
-                        sfen.append(str(p[piece_type]))
+                        fen.append(str(p[piece_type]))
                     piece = Piece(piece_type, color)
-                    sfen.append(piece.symbol())
+                    fen.append(piece.symbol())
         if pih_len == 0:
-            sfen.append('-')
+            fen.append('-')
 
-        sfen.append(' ')
+        fen.append(' ')
 
         # Move count
-        sfen.append(str(self.move_number))
+        fen.append(str(self.move_number))
 
-        return ''.join(sfen)
+        return ''.join(fen)
 
-    def set_sfen(self, sfen):
+    def set_fen(self, fen):
         '''
-        Parses a SFEN and sets the position from it.
-        Rasies `ValueError` if the SFEN string is invalid.
+        Parses a FEN and sets the position from it.
+        Rasies `ValueError` if the FEN string is invalid.
         '''
         # Ensure there are six parts.
-        parts = sfen.split()
+        parts = fen.split()
         if len(parts) != 4:
-            raise ValueError('sfen string should consist of 6 parts: {0}'.format(repr(sfen)))
+            raise ValueError('fen string should consist of 6 parts: {0}'.format(repr(fen)))
 
         # Ensure the board part is valid.
         rows = parts[0].split('/')
         if len(rows) != 9:
-            raise ValueError('expected 9 rows in position part of sfen: {0}'.format(repr(sfen)))
+            raise ValueError('expected 9 rows in position part of fen: {0}'.format(repr(fen)))
 
         # Validate each row.
         for row in rows:
@@ -1148,32 +1149,32 @@ class Board(object):
             for c in row:
                 if c in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
                     if previous_was_digit:
-                        raise ValueError('two subsequent digits in position part of sfen: {0}'.format(repr(sfen)))
+                        raise ValueError('two subsequent digits in position part of fen: {0}'.format(repr(fen)))
                     if previous_was_plus:
-                        raise ValueError('Cannot promote squares in position part of sfen: {0}'.format(repr(sfen)))
+                        raise ValueError('Cannot promote squares in position part of fen: {0}'.format(repr(fen)))
                     field_sum += int(c)
                     previous_was_digit = True
                     previous_was_plus = False
                 elif c == '+':
                     if previous_was_plus:
-                        raise ValueError('Double promotion prefixes in position part of sfen: {0}'.format(repr(sfen)))
+                        raise ValueError('Double promotion prefixes in position part of fen: {0}'.format(repr(fen)))
                     previous_was_digit = False
                     previous_was_plus = True
                 elif c.lower() in ['p', 'l', 'n', 's', 'g', 'b', 'r', 'k']:
                     field_sum += 1
                     if previous_was_plus and (c.lower() == 'g' or c.lower() == 'k'):
-                      raise ValueError('Gold and King cannot promote in position part of sfen: {0}')
+                      raise ValueError('Gold and King cannot promote in position part of fen: {0}')
                     previous_was_digit = False
                     previous_was_plus = False
                 else:
-                    raise ValueError('invalid character in position part of sfen: {0}'.format(repr(sfen)))
+                    raise ValueError('invalid character in position part of fen: {0}'.format(repr(fen)))
 
             if field_sum != 9:
-                raise ValueError('expected 9 columns per row in position part of sfen: {0}'.format(repr(sfen)))
+                raise ValueError('expected 9 columns per row in position part of fen: {0}'.format(repr(fen)))
 
         # Check that the turn part is valid.
         if not parts[1] in ['b', 'w']:
-            raise ValueError("expected 'b' or 'w' for turn part of sfen: {0}".format(repr(sfen)))
+            raise ValueError("expected 'b' or 'w' for turn part of fen: {0}".format(repr(fen)))
 
         # Check pieces in hand is valid.
         # TODO: implement with checking parts[2]
@@ -1181,7 +1182,7 @@ class Board(object):
         # Check that the fullmove number part is valid.
         # 0 is allowed for compability but later replaced with 1.
         if int(parts[3]) < 0:
-            raise ValueError('fullmove number must be positive: {0}'.format(repr(sfen)))
+            raise ValueError('fullmove number must be positive: {0}'.format(repr(fen)))
 
         # Clear board.
         self.clear()
@@ -1231,18 +1232,18 @@ class Board(object):
         # Reset the transposition table.
         self.transpositions = collections.Counter((self.zobrist_hash(), ))
 
-    def push_usi(self, usi):
+    def push_hub(self, hub):
         '''
         Parses a move in standard coordinate notation, makes the move and puts
         it on the the move stack.
         Raises `ValueError` if neither legal nor a null move.
         Returns the move.
         '''
-        move = Move.from_usi(usi)
+        move = Move.from_hub(hub)
         self.push(move)
         return move
 
-    def kif_pieces_in_hand_str(self, color):
+    def pdn_pieces_in_hand_str(self, color):
         builder = [[
             '先手の持駒：',
             '後手の持駒：',
@@ -1261,10 +1262,10 @@ class Board(object):
         return ''.join(builder)
 
 
-    def kif_str(self):
+    def pdn_str(self):
         builder = []
 
-        builder.append(self.kif_pieces_in_hand_str(WHITE))
+        builder.append(self.pdn_pieces_in_hand_str(WHITE))
 
         builder.append('\n ')
         for file_num in range(9, 0, -1):
@@ -1290,12 +1291,12 @@ class Board(object):
 
         builder.append('+---------------------------+\n')
 
-        builder.append(self.kif_pieces_in_hand_str(BLACK))
+        builder.append(self.pdn_pieces_in_hand_str(BLACK))
 
         return ''.join(builder)
 
     def __repr__(self):
-        return "Board('{0}')".format(self.sfen())
+        return "Board('{0}')".format(self.fen())
 
     def __str__(self):
         builder = []

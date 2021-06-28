@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the python-shogi library.
+# This file is part of the python-draughts library.
 # Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2021- TheYoBots (Yohaan Seth Nathan)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +19,12 @@
 
 from __future__ import unicode_literals
 
-import shogi
+import draughts
 import unittest
 
 class MoveTestCase(unittest.TestCase):
     def test_issue_8(self):
-        move = shogi.Move.from_usi('9a9b')
+        move = draughts.Move.from_hub('9a9b')
         self.assertEqual(move.__hash__(), 9)
 
 if __name__ == '__main__':

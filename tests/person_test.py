@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the python-shogi library.
+# This file is part of the python-draughts library.
 # Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2021- TheYoBots (Yohaan Seth Nathan)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +19,7 @@
 
 from __future__ import unicode_literals
 
-from shogi import Person
+from draughts import Person
 import unittest
 
 class NameTestCase(unittest.TestCase):

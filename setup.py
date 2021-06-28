@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the python-shogi library.
+# This file is part of the python-draughts library.
 # Copyright (C) 2012-2014 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
 # Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2021- TheYoBots (Yohaan Seth Nathan)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 import os
 import io
-import shogi
+import draughts
 import setuptools
 
 def read_description():
@@ -27,16 +28,16 @@ def read_description():
   return description
 
 setuptools.setup(
-    name = 'python-shogi',
-    version = shogi.__version__,
-    author = shogi.__author__,
-    author_email = shogi.__email__,
-    description = 'A pure Python shogi library with move generation and validation and handling of common formats.',
+    name = 'python-draughts',
+    version = draughts.__version__,
+    author = draughts.__author__,
+    author_email = draughts.__email__,
+    description = 'A pure Python draughts library with move generation and validation and handling of common formats.',
     long_description = read_description(),
     license = "GPL3",
-    keywords = 'shogi csa kif',
-    url = 'https://github.com/gunyarakun/python-shogi',
-    packages = ['shogi'],
+    keywords = 'draughts hub pdn',
+    url = 'https://github.com/TheYoBots/python-draughts',
+    packages = ['draughts'],
     scripts = [],
     test_suite = 'nose.collector',
     tests_require = ['nose>=1.0', 'mock'],

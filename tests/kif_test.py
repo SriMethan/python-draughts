@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the python-shogi library.
+# This file is part of the python-draughts library.
 # Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2021- TheYoBots (Yohaan Seth Nathan)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +19,7 @@
 
 from __future__ import unicode_literals
 
-import shogi
+import draughts
 
 import os
 import codecs
@@ -26,9 +27,9 @@ import shutil
 import unittest
 import tempfile
 from mock import patch
-from shogi import KIF
+from draughts import PDN
 
-TEST_KIF_STR = """開始日時：2006/12/15 21:03\r
+TEST_PDN_STR = """開始日時：2006/12/15 21:03\r
 消費時間：▲359△359\r
 棋戦：順位戦\r
 戦型：四間飛車\r
@@ -229,7 +230,7 @@ TEST_KIF_STR = """開始日時：2006/12/15 21:03\r
 まで181手で先手の勝ち\r
 """
 
-TEST_KIF_STR_WITH_TIME = """# --- Kifu for Windows (HTTP) V6.54 棋譜ファイル ---
+TEST_PDN_STR_WITH_TIME = """# --- PDN for Windows (HTTP) V6.54 棋譜ファイル ---
 対局ID：1234\r
 開始日時：2013/08/08 09:00\r
 終了日時：2013/08/09 17:40\r
@@ -336,7 +337,7 @@ TEST_KIF_STR_WITH_TIME = """# --- Kifu for Windows (HTTP) V6.54 棋譜ファイ�
 まで78手で後手の勝ち\r
 """
 
-TEST_KIF_81DOJO = """#KIF version=2.0 encoding=UTF-8\r
+TEST_PDN_81DOJO = """# PDN version=2.0 encoding=UTF-8\r
 開始日時：2020/12/31\r
 場所：81Dojo\r
 持ち時間：0分+10秒\r
@@ -359,8 +360,8 @@ TEST_KIF_81DOJO = """#KIF version=2.0 encoding=UTF-8\r
 """
 
 
-TEST_KIF_CUSTOM_BOARD = """# ----  Kifu for Windows V4.01β 棋譜ファイル  ----
-# ファイル名：D:\\b\\temp\\M2TOK141\\KIFU\\1t120600-1.kif
+TEST_PDN_CUSTOM_BOARD = """# ----  PDN for Windows V4.01β 棋譜ファイル  ----
+# ファイル名：D:\\b\\temp\\M2TOK141\\PDN\\1t120600-1.pdn
 棋戦：１手詰
 戦型：なし
 手合割：平手　　
@@ -388,7 +389,7 @@ TEST_KIF_CUSTOM_BOARD = """# ----  Kifu for Windows V4.01β 棋譜ファイル  
 まで1手で中断
 """
 
-TEST_KIF_RESULT = {
+TEST_PDN_RESULT = {
     'moves': [
         '7g7f', '3c3d', '2g2f', '4c4d', '3i4h', '8b4b', '5i6h', '5a6b', '6h7h',
         '6b7b', '5g5f', '3a3b', '4h5g', '3b4c', '8h7g', '7b8b', '2f2e', '2b3c',
@@ -412,12 +413,12 @@ TEST_KIF_RESULT = {
         '7b7c', '8d8c+', 'G*8a', 'P*9b', '8a9b', 'R*7a', 'L*8a', '8c9b', '9a9b',
         '7a7b+'
     ],
-    'sfen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
+    'fen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
     'names': ['\u7fbd\u751f\u5584\u6cbb', '\u85e4\u4e95\u731b'],
     'win': 'b'
 }
 
-TEST_KIF_WITH_TIME_RESULT = {
+TEST_PDN_WITH_TIME_RESULT = {
     'moves': [
         '7g7f', '3c3d', '2g2f', '8c8d', '2f2e', '8d8e', '6i7h', '4a3b', '2e2d', '2c2d',
         '2h2d', '8e8f', '8g8f', '8b8f', '2d3d', '2b3c', '3d3f', '8f8d', '3f2f', '3a2b',
@@ -428,69 +429,69 @@ TEST_KIF_WITH_TIME_RESULT = {
         'L*5b', '5a4b', '8a6a+', 'N*7f', 'G*7i', '7f6h+', '7i6h', '3c4e', '6a6b', 'B*8d',
         '6b5a', '8d5a', '5b5a+', '4e5g+', '6h5g', '9i5i', '5h5i', 'R*7i'
     ],
-    'sfen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
+    'fen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
     'names': [u'\u884c\u65b9\u5c1a\u53f2', u'\u7fbd\u751f\u5584\u6cbb'],
     'win': 'w',
 }
 
-TEST_KIF_81DOJO_RESULT = {
+TEST_PDN_81DOJO_RESULT = {
     'moves': [
         '7g7f', '3c3d', '7f7e', '4c4d', '2h7h', '8b4b', '7i6h', '7a8b', '7e7d', '7c7d', '7h7d'
     ],
-    'sfen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
+    'fen': 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
     'names': ['KikiNoOmata', 'XiaoNoOmata'],
     'win': 'b',
 }
 
-TEST_KIF_CUSTOM_BOARD_RESULT = {'names': ['大内延介', '最新詰将棋２００選'],
-                                'sfen': '8l/4R+B2k/7p1/6s2/9/9/9/9/9 w 1r1b4g3s4n3l17p 1',
+TEST_PDN_CUSTOM_BOARD_RESULT = {'names': ['大内延介', '最新詰将棋２００選'],
+                                'fen': '8l/4R+B2k/7p1/6s2/9/9/9/9/9 w 1r1b4g3s4n3l17p 1',
                                 'moves': ['4b3a'],
                                 'win': '-'}
 
 class ParserTest(unittest.TestCase):
     def test_parse_str(self):
-        result = KIF.Parser.parse_str(TEST_KIF_STR)
-        self.assertEqual(result[0], TEST_KIF_RESULT)
+        result = PDN.Parser.parse_str(TEST_PDN_STR)
+        self.assertEqual(result[0], TEST_PDN_RESULT)
 
     def test_parse_str_with_time(self):
-        result = KIF.Parser.parse_str(TEST_KIF_STR_WITH_TIME)
-        self.assertEqual(result[0], TEST_KIF_WITH_TIME_RESULT)
+        result = PDN.Parser.parse_str(TEST_PDN_STR_WITH_TIME)
+        self.assertEqual(result[0], TEST_PDN_WITH_TIME_RESULT)
 
     def test_parse_str_81dojo(self):
-        result = KIF.Parser.parse_str(TEST_KIF_81DOJO)
-        self.assertEqual(result[0], TEST_KIF_81DOJO_RESULT)
+        result = PDN.Parser.parse_str(TEST_PDN_81DOJO)
+        self.assertEqual(result[0], TEST_PDN_81DOJO_RESULT)
 
     def test_parse_file(self):
         try:
             tempdir = tempfile.mkdtemp()
 
             # cp932
-            path = os.path.join(tempdir, 'test1.kif')
+            path = os.path.join(tempdir, 'test1.pdn')
             with codecs.open(path, 'w', 'cp932') as f:
-                f.write(TEST_KIF_STR)
-            result = KIF.Parser.parse_file(path)
-            self.assertEqual(result[0], TEST_KIF_RESULT)
+                f.write(TEST_PDN_STR)
+            result = PDN.Parser.parse_file(path)
+            self.assertEqual(result[0], TEST_PDN_RESULT)
 
             # utf-8
-            path = os.path.join(tempdir, 'test2.kif')
+            path = os.path.join(tempdir, 'test2.pdn')
             with codecs.open(path, 'w', 'utf-8') as f:
-                f.write(TEST_KIF_STR)
-            result = KIF.Parser.parse_file(path)
-            self.assertEqual(result[0], TEST_KIF_RESULT)
+                f.write(TEST_PDN_STR)
+            result = PDN.Parser.parse_file(path)
+            self.assertEqual(result[0], TEST_PDN_RESULT)
 
             # utf-8 (BOM)
-            path = os.path.join(tempdir, 'test3.kif')
+            path = os.path.join(tempdir, 'test3.pdn')
             with codecs.open(path, 'w', 'utf-8-sig') as f:
-                f.write(TEST_KIF_STR)
-            result = KIF.Parser.parse_file(path)
-            self.assertEqual(result[0], TEST_KIF_RESULT)
+                f.write(TEST_PDN_STR)
+            result = PDN.Parser.parse_file(path)
+            self.assertEqual(result[0], TEST_PDN_RESULT)
 
-            # .kif with custom starting position
-            path = os.path.join(tempdir, 'test_tsume.kif')
+            # .pdn with custom starting position
+            path = os.path.join(tempdir, 'test_tsume.pdn')
             with codecs.open(path, 'w', 'cp932') as f:
-                f.write(TEST_KIF_CUSTOM_BOARD)
-            result = KIF.Parser.parse_file(path)
-            self.assertEqual(result[0], TEST_KIF_CUSTOM_BOARD_RESULT)
+                f.write(TEST_PDN_CUSTOM_BOARD)
+            result = PDN.Parser.parse_file(path)
+            self.assertEqual(result[0], TEST_PDN_CUSTOM_BOARD_RESULT)
 
         finally:
             shutil.rmtree(tempdir)

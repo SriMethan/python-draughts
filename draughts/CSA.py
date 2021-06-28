@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the python-shogi library.
+# This file is part of the python-draughts library.
 # Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2021- TheYoBots (Yohaan Seth Nathan)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +21,7 @@ from __future__ import unicode_literals
 
 import re
 import time
-import shogi
+import draughts
 import socket
 import threading
 import collections
@@ -70,7 +71,7 @@ class Parser:
     def parse_str(csa_str):
         line_no = 1
 
-        sfen = None
+        fen = None
         board = None
         position_lines = []
         names = [None, None]
@@ -100,7 +101,7 @@ class Parser:
                         raise ValueError('Board infomation is not defined before a move')
                     (color, move) = Parser.parse_move_str(line, board)
                     moves.append(move)
-                    board.push(shogi.Move.from_usi(move))
+                    board.push(draughts.Move.from_hub(move))
             elif line[0] == 'T':
                 # Currently just ignoring consumed time
                 pass
@@ -113,9 +114,9 @@ class Parser:
                         ]:
                     lose_color = board.turn
                 elif line == '%+ILLEGAL_ACTION':
-                    lose_color = shogi.BLACK
+                    lose_color = draughts.BLACK
                 elif line == '%-ILLEGAL_ACTION':
-                    lose_color = shogi.WHITE
+                    lose_color = draughts.WHITE
 
                 # TODO: Support %MATTA etc.
                 break
@@ -125,24 +126,24 @@ class Parser:
                 raise ValueError('Invalid line {0}: {1}'.format(line_no, line))
             if board is None and current_turn_str:
                 position = Parser.parse_position(position_lines)
-                sfen = Exporter.sfen(
+                fen = Exporter.fen(
                     position['pieces'],
                     position['pieces_in_hand'],
                     current_turn_str,
                     1)
-                board = shogi.Board(sfen)
+                board = draughts.Board(fen)
             line_no += 1
 
-        if lose_color == shogi.BLACK:
+        if lose_color == draughts.BLACK:
             win = 'w'
-        elif lose_color == shogi.WHITE:
+        elif lose_color == draughts.WHITE:
             win = 'b'
         else:
             win = '-'
 
         summary = {
             'names': names,
-            'sfen': sfen,
+            'fen': fen,
             'moves': moves,
             'win': win
         }
@@ -165,12 +166,12 @@ class Parser:
         piece_type = PIECE_SYMBOLS.index(piece_str)
 
         if from_square is None:
-            return (color, '{0}*{1}'.format(shogi.PIECE_SYMBOLS[piece_type].upper(),
-                shogi.SQUARE_NAMES[to_square]))
+            return (color, '{0}*{1}'.format(draughts.PIECE_SYMBOLS[piece_type].upper(),
+                draughts.SQUARE_NAMES[to_square]))
         else:
             from_piece_type = board.pieces[from_square]
             promotion = (from_piece_type != piece_type)
-            return (color, shogi.SQUARE_NAMES[from_square] + shogi.SQUARE_NAMES[to_square] + ('+' if promotion else ''))
+            return (color, draughts.SQUARE_NAMES[from_square] + draughts.SQUARE_NAMES[to_square] + ('+' if promotion else ''))
 
     @staticmethod
     def parse_position(position_block_lines):
@@ -266,65 +267,65 @@ class Parser:
 
 class Exporter:
     @staticmethod
-    def sfen(pieces, pieces_in_hand, current_turn_char, move_count):
-        sfen = []
+    def fen(pieces, pieces_in_hand, current_turn_char, move_count):
+        fen = []
         empty = 0
 
         # Position part.
-        for square in shogi.SQUARES:
+        for square in draughts.SQUARES:
             piece_tuple = pieces[square]
             if piece_tuple is None:
                 empty += 1
             else:
                 (piece_type, color) = piece_tuple
-                piece = shogi.Piece(piece_type, color)
+                piece = draughts.Piece(piece_type, color)
 
                 if empty:
-                    sfen.append(str(empty))
+                    fen.append(str(empty))
                     empty = 0
-                sfen.append(piece.symbol())
+                fen.append(piece.symbol())
 
-            if shogi.BB_SQUARES[square] & shogi.BB_FILE_1:
+            if draughts.BB_SQUARES[square] & draughts.BB_FILE_1:
                 if empty:
-                    sfen.append(str(empty))
+                    fen.append(str(empty))
                     empty = 0
 
-                if square != shogi.I1:
-                    sfen.append('/')
+                if square != draughts.I1:
+                    fen.append('/')
 
-        sfen.append(' ')
+        fen.append(' ')
 
         # Side to move.
         current_turn = COLOR_SYMBOLS.index(current_turn_char)
-        if current_turn == shogi.WHITE:
-            sfen.append('w')
+        if current_turn == draughts.WHITE:
+            fen.append('w')
         else:
-            sfen.append('b')
+            fen.append('b')
 
-        sfen.append(' ')
+        fen.append(' ')
 
         # Pieces in hand
         pih_len = 0
-        for color in shogi.COLORS:
+        for color in draughts.COLORS:
             p = pieces_in_hand[color]
             pih_len += len(p)
             for piece_type in p.keys():
                 if p[piece_type] > 1:
-                    sfen.append(str(p[piece_type]))
+                    fen.append(str(p[piece_type]))
                 elif p[piece_type] >= 1:
-                    piece = shogi.Piece(piece_type, color)
-                    sfen.append(piece.symbol())
+                    piece = draughts.Piece(piece_type, color)
+                    fen.append(piece.symbol())
         if pih_len == 0:
-            sfen.append('-')
+            fen.append('-')
 
-        sfen.append(' ')
+        fen.append(' ')
 
         # Move count
-        sfen.append(str(move_count))
+        fen.append(str(move_count))
 
-        sfen_str = ''.join(sfen)
+        fen_str = ''.join(fen)
 
-        return sfen_str
+        return fen_str
 
 class TCPProtocol:
     def __init__(self, host=None, port=0):
@@ -455,8 +456,8 @@ class TCPProtocol:
             move_strs = line.split(',')
             move_str = move_strs[0]
             time_str = move_strs[1] if len(move_strs) > 1 else None
-            (color, usi) = Parser.parse_move_str(move_str, board)
-            return (color, usi, self.parse_consumed_time_str(time_str), None)
+            (color, hub) = Parser.parse_move_str(move_str, board)
+            return (color, hub, self.parse_consumed_time_str(time_str), None)
         elif line[0] in ['#', '%']:
             message = SERVER_MESSAGE_SYMBOLS.index(line[1:])
             return (None, None, None, message)
@@ -501,10 +502,10 @@ class TCPProtocol:
                 (key, value) = line.split(':', 1)
                 if key == 'Name+':
                     # sente or shiatte
-                    names[shogi.BLACK] = value
+                    names[draughts.BLACK] = value
                 elif key == 'Name-':
                     # sente or shiatte
-                    names[shogi.WHITE] = value
+                    names[draughts.WHITE] = value
                 elif key == 'To_Move':
                     to_move_color_str = value
                 elif key == 'Your_Turn':
@@ -515,7 +516,7 @@ class TCPProtocol:
             else:
                 raise ValueError('Invalid game summary line: {0}'.format(line))
 
-        sfen = Exporter.sfen(
+        fen = Exporter.fen(
             position['pieces'],
             position['pieces_in_hand'],
             to_move_color_str,
@@ -523,7 +524,7 @@ class TCPProtocol:
 
         summary = {
             'names': names,
-            'sfen': sfen,
+            'fen': fen,
             'moves': [],
             'time': time_summary,
         }
