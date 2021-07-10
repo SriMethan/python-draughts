@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of the python-draughts library.
-# Copyright (C) 2012-2014 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
-# Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2010-2018 ImparaAI https://impara.ai (MIT LICENSE)
 # Copyright (C) 2021- TheYoBots (Yohaan Seth Nathan)
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,39 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import io
-import draughts
-import setuptools
+from setuptools import setup, find_packages
 
-def read_description():
-  description = io.open(os.path.join(os.path.dirname(__file__), 'README.rst'), encoding='utf-8').read()
-  return description
 
-setuptools.setup(
-    name = 'python-draughts',
-    version = draughts.__version__,
-    author = draughts.__author__,
-    author_email = draughts.__email__,
-    description = 'A pure Python draughts library with move generation and validation and handling of common formats.',
-    long_description = read_description(),
-    license = "GPL3",
-    keywords = 'draughts hub pdn',
-    url = 'https://github.com/TheYoBots/python-draughts',
-    packages = ['draughts'],
-    scripts = [],
-    test_suite = 'nose.collector',
-    tests_require = ['nose>=1.0', 'mock'],
-    classifiers = [
-      'Development Status :: 5 - Production/Stable',
-      'Intended Audience :: Developers',
-      'License :: OSI Approved :: GNU General Public License (GPL)',
-      'Operating System :: OS Independent',
-      'Programming Language :: Python',
-      'Programming Language :: Python :: 2',
-      'Programming Language :: Python :: 2.7',
-      'Programming Language :: Python :: 3',
-      'Topic :: Games/Entertainment :: Board Games',
-      'Topic :: Software Development :: Libraries :: Python Modules',
-    ],
+setup(
+    name='python-draughts',
+    version='0.1',
+    license='GNU General Public License (GPL)',
+    author="Yohaan Seth Nathan",
+    author_email='yohaan.nathanjw@gmail.com',
+    packages=find_packages('draughts'),
+    package_dir={'': 'draughts'},
+    url='https://github.com/TheYoBots/python-draughts',
+    keywords='draughts pdn fen'
 )

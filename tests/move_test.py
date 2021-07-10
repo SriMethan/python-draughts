@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of the python-draughts library.
-# Copyright (C) 2015- Tasuku SUENAGA <tasuku-s-github@titech.ac>
+# Copyright (C) 2010-2018 ImparaAI https://impara.ai (MIT License)
 # Copyright (C) 2021- TheYoBots (Yohaan Seth Nathan)
 #
 # This program is free software: you can redistribute it and/or modify
