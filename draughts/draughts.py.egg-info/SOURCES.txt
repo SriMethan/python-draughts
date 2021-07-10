@@ -1,8 +1,0 @@
-LICENSE
-README.md
-setup.cfg
-setup.py
-draughts/draughts.py.egg-info/PKG-INFO
-draughts/draughts.py.egg-info/SOURCES.txt
-draughts/draughts.py.egg-info/dependency_links.txt
-draughts/draughts.py.egg-info/top_level.txt

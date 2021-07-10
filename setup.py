@@ -17,12 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import io
+import setuptools
 from setuptools import setup, find_packages
 
+def read_description():
+  description = io.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8').read()
+  return description
 
-setup(
+setuptools.setup(
     name='python-draughts',
-    version='0.1',
+    version='1.0.0',
     license='GNU General Public License (GPL)',
     author="Yohaan Seth Nathan",
     author_email='yohaan.nathanjw@gmail.com',

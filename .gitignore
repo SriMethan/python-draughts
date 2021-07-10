@@ -13,3 +13,4 @@ python_draughts.egg-info/
 nosetests.xml
 docs/_build/
 get-pip.py
+draughts/python_draughts.egg-info

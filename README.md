@@ -1,5 +1,7 @@
 # python-draughts
 
+[![PyPI version](https://badge.fury.io/py/python-draughts.svg)](https://badge.fury.io/py/python-chess)
+
 *Based on [ImparaAI/checkers](https://github.com/ImparaAI/checkers) and using various concepts from [RoepStoep/draughtsnet](https://github.com/RoepStoep/draughtsnet).*
 
 A Python3 library that you can use to play a game of draughts. This is just a set of classes that you can use in your code, it's not an interactive shell draughts game (unlike [python-chess](https://pypi.python.org/pypi/python-shogi) and [python-shogi](https://pypi.python.org/pypi/chess) for the games [chess](https://en.wikipedia.org/wiki/Chess) and [shogi](https://en.wikipedia.org/wiki/Shogi) respectively).
