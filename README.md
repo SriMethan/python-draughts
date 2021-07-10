@@ -1,221 +1,91 @@
-# python-draughts: A draughts library written purely in python.
+# python-draughts
 
-## Introduction
+*Based on [ImparaAI/checkers](https://github.com/ImparaAI/checkers) and using various concepts from [RoepStoep/draughtsnet](https://github.com/RoepStoep/draughtsnet).*
 
-This is the module for draughts written in Pure Python. It's based on [python-shogi](https://github.com/gunyarakun/python-shogi), which is based on [python-chess](https://github.com/niklasf/python-chess/commit/6203406259504cddf6f271e6a7b1e04ba0c96165).
+A Python3 library that you can use to play a game of draughts. This is just a set of classes that you can use in your code, it's not an interactive shell draughts game (unlike [python-chess](https://pypi.python.org/pypi/python-shogi) and [python-shogi](https://pypi.python.org/pypi/chess) for the games [chess](https://en.wikipedia.org/wiki/Chess) and [shogi](https://en.wikipedia.org/wiki/Shogi) respectively).
 
-## Features
+## Assumptions
 
-- Supports Python 2.7 and Python 3.3+.
+The rules used are for competitive [International draughts *(also called Polish draughts or International checkers)*](https://en.wikipedia.org/wiki/International_draughts). This means a 10x10 board with force captures and regular kings. Also supporting various other draughts variant ([description on supported variants](https://lidraughts.org/variant)).
 
-- Supports standard draughts (10x10)
+Each position on the board is numbered 1 to 50. Each move is represented as an array with two values: `starting position` and `ending position`. So if you're starting a new game, one of the available moves is `[9, 13]` for player 1. If there's a capture move, the ending position is the position the capturing piece will land on (i.e. two rows from its original row), which might look like `[13, 22]`.
 
-- Legal move generator and move validation.
+Each piece movement is completely distinct, even if the move is part of a multiple capture series. In [Portable Draughts Notation](https://en.wikipedia.org/wiki/Portable_Draughts_Notation) mutli-capture series are usually represented by a `5-32` (for a particularly long series of jumps), but in certain situations there could be multiple pathways to achieve that final position. This game requires an explicit spelling out of each distinct move in the multi-capture series.
 
-```python
->>> draughts.Move.from_hub("5i5a") in board.legal_moves
-False
-```
+*Note: Just examples, not necessarily legal positions/moves.*
 
-- Make and unmake moves.
+## Usage
 
-```python
->>> last_move = board.pop() # Unmake last move
->>> last_move
-Move.from_hub('2b3a')
-
->>> board.push(last_move) # Restore
-```
-
-- Show a simple ASCII board.
+- Create a new game:
 
 ```python
->>> print(board)
-l  n  s  g  .  k +B  n  l
-.  r  .  .  g  B  .  .  .
-p  p  p  p  p  p  .  p  p
-.  .  .  .  .  .  p  .  .
-.  .  .  .  .  .  .  .  .
-.  .  P  .  .  .  .  .  .
-P  P  .  P  P  P  P  P  P
-.  .  .  .  .  .  .  R  .
-L  N  S  G  K  G  S  N  L
-<BLANKLINE>
-S*1
+from checkers.game import Game
+
+game = Game()
 ```
 
-- Show a PDN style board.
+- See whose turn it is:
 
 ```python
->>> print(board.pdn_str())
-後手の持駒：
-  ９ ８ ７ ６ ５ ４ ３ ２ １
-+---------------------------+
-|v香v桂v銀v金 ・v玉 馬v桂v香|一
-| ・v飛 ・ ・v金 角 ・ ・ ・|二
-|v歩v歩v歩v歩v歩v歩 ・v歩v歩|三
-| ・ ・ ・ ・ ・ ・v歩 ・ ・|四
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|五
-| ・ ・ 歩 ・ ・ ・ ・ ・ ・|六
-| 歩 歩 ・ 歩 歩 歩 歩 歩 歩|七
-| ・ ・ ・ ・ ・ ・ ・ 飛 ・|八
-| 香 桂 銀 金 玉 金 銀 桂 香|九
-+---------------------------+
-先手の持駒：　銀
+game.whose_turn() #1 or 2
 ```
 
-- Detects checkmates, stalemates.
+- Get the possible moves:
 
 ```python
->>> board.is_stalemate()
-False
->>> board.is_game_over()
-True
+game.get_possible_moves() #[[9, 13], [9, 14], [10, 14], [10, 15], [11, 15], [11, 16], [12, 16]]
 ```
 
-- Detects repetitions. Has a half move clock.
+- Make a move:
 
 ```python
->>> board.is_fourfold_repetition()
-False
->>> board.move_number
-8
+game.move([9, 13])
 ```
 
-- Detects checks and attacks.
+- Check if the game is over:
 
 ```python
->>> board.is_check()
-True
->>> board.is_attacked_by(draughts.BLACK, draughts.A4)
-True
->>> attackers = board.attackers(draughts.BLACK, draughts.H5)
->>> attackers
-SquareSet(0b111000010000000000000000000000000000000000000000000000000000000000000000000000)
->>> draughts.H2 in attackers
-True
->>> print(attackers)
-. . . . . . . . .
-. . . . . . . . .
-. . . . . . . . .
-. . . . . . . . .
-. . . . . . . . .
-. . . . . . . . .
-. . . . . . . . .
-. . . . . . . 1 .
-. . . 1 1 1 . . .
+game.is_over() #True or False
 ```
 
-- Parses and creates HUB representation of moves.
+- Find out who won:
 
 ```python
->>> board = draughts.Board()
->>> draughts.Move(draughts.E2, draughts.E4).hub()
-'2e4e'
+game.get_winner() #None or 1 or 2
 ```
 
-- Parses and creates FENs
+- Review the move history:
 
 ```python
->>> board.fen()
-'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1'
->>> board.piece_at(draughts.I5)
-Piece.from_symbol('K')
+game.moves #[[int, int], [int, int], ...]
 ```
 
-- Read PDNs.
+Change the consecutive noncapture move limit (default `40` according to the [rules](http://www.usacheckers.com/rulesofcheckers.php)):
 
 ```python
->>> import draughts.PDN
-
->>> pdn = draughts.PDN.Parser.parse_file('data/games/habu-fujii-2006.pdn')[0]
-
->>> pdn['names'][draughts.BLACK]
-'羽生善治'
->>> pdn['names'][draughts.WHITE]
-'藤井猛'
->>> pdn['moves'] # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-['7g7f',
- '3c3d',
-    ...,
- '9a9b',
- '7a7b+']
->>> pdn['win']
-'b'
+game.consecutive_noncapture_move_limit = 20
+game.move_limit_reached() #True or False
 ```
 
-- Communicate with a CSA protocol. <br/> <br/>
-Please see [random_csa_tcp_match](https://github.com/TheYoBots/python-draughts/blob/master/scripts/random_csa_tcp_match).
-
-- Parse professional draughts players' name
+- Review the pieces on the board:
 
 ```python
->>> import draughts.Person
-
->>> draughts.Person.Name.is_professional('羽生　善治 名人・棋聖・王位・王座')
-True
+for piece in game.board.pieces:
+	piece.player #1 or 2
+	piece.other_player #1 or 2
+	piece.king #True or False
+	piece.captured #True or False
+	piece.position #1-32
+	piece.get_possible_capture_moves() #[[int, int], [int, int], ...]
+	piece.get_possible_positional_moves() #[[int, int], [int, int], ...]
 ```
 
-## Performance
+## To do
 
-python-draughts is not intended to be used by serious draughts engines where
-performance is critical. The goal is rather to create a simple and relatively
-highlevel library.
-
-You can install the `gmpy2` or `gmpy` (https://code.google.com/p/gmpy/) modules
-in order to get a slight performance boost on basic operations like bit scans
-and population counts.
-
-python-draughts will only ever import very basic general (non-draughts-related)
-operations from native libraries. All logic is pure Python. There will always
-be pure Python fallbacks.
-
-## Installing
-
-- With pip:
-
-```python
-sudo pip install python-draughts
-```
-
-- From current source code:
-
-```python
-python setup.py sdist
-sudo python setup.py install
-```
-
-## How to test
-
-```python
-> nosetests
-or
-> python setup.py test # requires python setup.py install
-```
-
-If you want to print lines from the standard output, execute nosetests like following.
-
-```python
-> nosetests -s
-```
-
-If you want to test among different Python versions, execute tox.
-
-```python
-> pip install tox
-> tox
-```
-
-## How to release
-
-```python
-rm -rf dist
-python setup.py sdist
-twine upload dist/*
-```
+- [ ] Fix [tests dir](/tests) to test code each commit.
 
 ## Acknowledgements
 
-- [python-chess](https://pypi.python.org/pypi/python-shogi)
-- [python-shogi](https://pypi.python.org/pypi/chess)
-- [draughtsnet](https://github.com/RoepStoep/draughtsnet)
+- [ImparaAI/checkers](https://github.com/ImparaAI/checkers) for creating a 8x8 draughts library.
+- [RoepStoep/draughtsnet](https://github.com/RoepStoep/draughtsnet) for various python concepts to help create this library.
+- [AttackingOrDefending/lidraughts-bot](https://github.com/AttackingOrDefending/lidraughts-bot) for implementing [ImparaAi/checkers](https://github.com/ImparaAi/checkers) for variants and 10x10 international draughts for a [lidraughts-bot](https://lidraughts.org/api#tag/Bot).
