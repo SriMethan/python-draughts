@@ -20,20 +20,29 @@
 import os
 import io
 import setuptools
-from setuptools import setup, find_packages
 
 def read_description():
   description = io.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8').read()
   return description
 
 setuptools.setup(
-    name='python-draughts',
-    version='0.2',
-    license='GNU General Public License (GPL)',
+    name="python-draughts",
+    version="0.3",
     author="Yohaan Seth Nathan",
-    author_email='yohaan.nathanjw@gmail.com',
-    packages=find_packages('draughts'),
-    package_dir={'': 'draughts'},
-    url='https://github.com/TheYoBots/python-draughts',
-    keywords='draughts pdn fen'
+    author_email="yohaan.nathanjw@gmail.com",
+    description="A Python3 library that you can use to play a game of draughts.",
+    long_description= read_description(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/TheYoBots/python-draughts",
+    project_urls={
+        "Bug Tracker": "https://github.com/TheYoBots/python-draughts/issues",
+    },
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: GNU General Public License (GPL)",
+        "Operating System :: OS Independent",
+    ],
+    package_dir={"": "draughts"},
+    packages=setuptools.find_packages(where="draughts"),
+    python_requires=">=3",
 )
