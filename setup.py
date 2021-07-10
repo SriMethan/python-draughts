@@ -28,7 +28,7 @@ def read_description():
 
 setuptools.setup(
     name='python-draughts',
-    version='1.0.0',
+    version='0.2',
     license='GNU General Public License (GPL)',
     author="Yohaan Seth Nathan",
     author_email='yohaan.nathanjw@gmail.com',

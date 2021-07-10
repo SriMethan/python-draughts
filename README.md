@@ -1,6 +1,6 @@
 # python-draughts
 
-[![PyPI version](https://badge.fury.io/py/python-draughts.svg)](https://badge.fury.io/py/python-chess)
+[![PyPI version](https://badge.fury.io/py/python-draughts.svg)](https://badge.fury.io/py/python-draughts)
 
 *Based on [ImparaAI/checkers](https://github.com/ImparaAI/checkers) and using various concepts from [RoepStoep/draughtsnet](https://github.com/RoepStoep/draughtsnet).*
 
